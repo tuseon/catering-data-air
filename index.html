@@ -9,7 +9,7 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
- .table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; }
     table { min-width: 650px; }
     input[type=number]::-webkit-outer-spin-button,
     input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -85,4 +85,61 @@
               <button onClick={() => setTahun(tahun+1)}>{tahun+1} →</button>
             </div>
             <div className="table-wrap border rounded">
-              <table className
+              <table className="w-full text-xs">
+                <thead className="bg-blue-800 text-white">
+                  <tr>
+                    <th className="p-1">BLN</th>
+                    <th className="p-1">TGL</th>
+                    <th className="p-1">METER<br/>LAMA</th>
+                    <th className="p-1">METER<br/>BARU</th>
+                    <th className="p-1">PAKAI<br/>M³</th>
+                    <th className="p-1">HRG/M³</th>
+                    <th className="p-1">JUMLAH<br/>RP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {bulan.map(bln => (
+                    <tr key={bln} className="border-t">
+                      <td className="p-1 text-center">{bln}</td>
+                      <td className="p-1"><input type="text" className="w-12 border" value={bayar[bln]?.tgl || ''} onChange={e => updateBayar(p.id, bln, 'tgl', e.target.value)} /></td>
+                      <td className="p-1"><input type="number" className="w-16 border" value={bayar[bln]?.meterLama || ''} onChange={e => updateBayar(p.id, bln, 'meterLama', e.target.value)} /></td>
+                      <td className="p-1"><input type="number" className="w-16 border" value={bayar[bln]?.meterBaru || ''} onChange={e => updateBayar(p.id, bln, 'meterBaru', e.target.value)} /></td>
+                      <td className="p-1 text-center">{bayar[bln]?.pakai || 0}</td>
+                      <td className="p-1"><input type="number" className="w-16 border" value={bayar[bln]?.hrg || ''} onChange={e => updateBayar(p.id, bln, 'hrg', e.target.value)} /></td>
+                      <td className="p-1 text-center">{bayar[bln]?.jumlah?.toLocaleString('id-ID') || 0}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="text-xs mt-2 text-gray-600">*Geser tabel ke kiri-kanan kalo gak muat</div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="p-4 max-w-2xl mx-auto">
+          <h1 className="text-2xl font-bold mb-4">Data Pelanggan Air</h1>
+          <div className="bg-gray-100 p-4 rounded mb-4">
+            <h2 className="font-bold mb-2">Tambah Pelanggan</h2>
+            <input className="border p-2 w-full mb-2" placeholder="Nama" value={nama} onChange={e => setNama(e.target.value)} />
+            <input className="border p-2 w-full mb-2" placeholder="Dusun" value={dusun} onChange={e => setDusun(e.target.value)} />
+            <input className="border p-2 w-full mb-2" placeholder="Alamat" value={alamat} onChange={e => setAlamat(e.target.value)} />
+            <button onClick={tambahPelanggan} className="bg-blue-600 text-white px-4 py-2 rounded w-full">Simpan</button>
+          </div>
+          <h2 className="font-bold mb-2">Daftar Pelanggan</h2>
+          {data.map(p => (
+            <div key={p.id} onClick={() => {setPelanggan(p.id); setView('detail')}} className="border p-3 mb-2 rounded cursor-pointer hover:bg-gray-50">
+              <div className="font-bold">{p.nama}</div>
+              <div className="text-sm text-gray-600">{p.dusun} - {p.alamat}</div>
+            </div>
+          ))}
+          {data.length === 0 && <div className="text-gray-500 text-center">Belum ada pelanggan</div>}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
