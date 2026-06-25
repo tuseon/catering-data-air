@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kartu Air V4.0 - Multi Pelanggan</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { background: #f5f5f5; padding: 10px; }
+   .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+   .header { background: #1976d2; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
+   .page { padding: 15px; display: none; }
+   .page.active { display: block; }
+   .btn { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+   .btn-primary { background: #1976d2; color: white; }
+   .btn-success { background: #388e3c; color: white; }
+   .btn-danger { background: #d32f2f; color: white; }
+   .btn-back { background: #757575; color: white; margin-bottom: 10px; }
+    input, select { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; }
+   .pelanggan-item { padding: 12px; border: 1px solid #eee; margin: 8px 0; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; }
+   .pelanggan-item:hover { background: #f0f8ff; }
+   .search-box { margin: 15px 0; }
+   .form-group { margin: 10px 0; }
+    label { font-weight: bold; font-size: 14px; }
+   .rekap { background: #e3f2fd; padding: 10px; border-radius: 5px; margin: 15px 0; text-align: center; }
+    table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  table-layout: fixed;
+  font-size: 11px;
+}
+th, td { 
+  border: 1px solid #ddd; 
+  padding: 4px; 
+  text-align: center; 
+}
+th { background: #34495e; color: white; font-size: 10px; }
+th:nth-child(1), td:nth-child(1) { width: 8%; }
+th:nth-child(2), td:nth-child(2) { width: 12%; }
+th:nth-child(3), td:nth-child(3) { width: 18%; }
+th:nth-child(4), td:nth-child(4) { width: 18%; }
+th:nth-child(5), td:nth-child(5) { width: 8%; }
+th:nth-child(6), td:nth-child(6) { width: 10%; }
+th:nth-child(7), td:nth-child(7) { width: 18%; }
+th:nth-child(8), td:nth-child(8) { width: 8%; }
+th:nth-child(9), td:nth-child(9) { width: 10%; }
+.foto-meter { 
+  width: 60px; 
+  height: 60px; 
+  object-fit: cover; 
+  border-radius: 4px; 
+  cursor: pointer;
+}
+.btn-kamera { 
+  background: #27ae60; 
+  color: white; 
+  border: none; 
+  padding: 4px 6px; 
+  border-radius: 3px; 
+  font-size: 9px;
+}
+input[type="file"] { display: none; }
+   .info-pelanggan { background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; }
+   .calculated { position: relative; }
+   .calculated::after { content: "🟢"; position: absolute; right: 2px; top: 2px; font-size: 10px; }
+   .tahun-nav { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 10px 0; }
+   .tahun-btn { color: #1976d2; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2 id="judul-header">DAFTAR PELANGGAN AIR</h2>
+    </div>
+
+    <!-- HALAMAN 1: DAFTAR PELANGGAN -->
+    <div id="page-daftar" class="page active">
+      <div class="search-box">
+        <input type="text" id="cari-pelanggan" placeholder="Cari nama atau dusun..." oninput="cariPelanggan()">
+      </div>
+      <button class="btn btn-success" onclick="showTambahPelanggan()">+ Tambah Pelanggan</button>
+      <div class="rekap" id="rekap-total"></div>
+      <div id="list-pelanggan"></div>
+    </div>
+
+    <!-- HALAMAN 2: TAMBAH PELANGGAN -->
+    <div id="page-tambah" class="page">
+      <button class="btn btn-back" onclick="showDaftar()">← Kembali</button>
+      <h3>Tambah Pelanggan Baru</h3>
+      <div class="form-group">
+        <label>Nomor Pelanggan:</label>
+        <input type="text" id="no-pelanggan" readonly>
+      </div>
+      <div class="form-group">
+        <label>Nama Lengkap:</label>
+        <input type="text" id="nama-pelanggan" placeholder="ISHAK">
+      </div>
+      <div class="form-group">
+        <label>Dusun:</label>
+        <select id="dusun-pelanggan">
+          <option value="KARANGREJO">KARANGREJO</option>
+          <option value="SINGOPOLO">SINGOPOLO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Alamat:</label>
+        <input type="text" id="alamat-pelanggan" placeholder="Singopolo">
+      </div>
+      <div class="form-group">
+        <label>Meter Awal:</label>
+        <input type="number" id="meter-awal" placeholder="0" value="0">
+      </div>
+      <button class="btn btn-primary" onclick="simpanPelanggan()">Simpan Pelanggan</button>
+    </div>
+
+    <!-- HALAMAN 3: KARTU AIR -->
+    <div id="page-kartu" class="page">
+      <button class="btn btn-back" onclick="showDaftar()">← Daftar Pelanggan</button>
+      <div class="info-pelanggan" id="info-pelanggan"></div>
+      <div class="tahun-nav">
+        <span class="tahun-btn" onclick="gantiTahun(-1)">← 2025</span>
+        <span id="tahun-aktif" style="font-weight:bold; font-size:18px;">2026</span>
+        <span class="tahun-btn" onclick="gantiTahun(1)">2027 →</span>
+      </div>
+      <table id="tabel-air">
+        <thead>
+          <tr>
+            <th>BLN</th>
+            <th>TGL</th>
+            <th>METER<br>LAMA</th>
+            <th>METER<br>BARU</th>
+            <th>PAKAI<br>M³</th>
+            <th>ABM</th>
+            <th>HRG/M³</th>
+            <th>JUMLAH<br>RP</th>
+            <th>FOTO</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-air"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    let db = JSON.parse(localStorage.getItem('kartuAirV4')) || { pelanggan: [], dataAir: {} };
+    let pelangganAktif = null;
+    let tahunAktif = 2026;
+    const bulanNama = ['JAN','FEB','MAR','APR','MEI','JUN','JUL','AGS','SEP','OKT','NOV','DES'];
+
+    function saveDB() {
+      localStorage.setItem('kartuAirV4', JSON.stringify(db));
+    }
+
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+    }
+
+    function showDaftar() {
+      document.getElementById('judul-header').textContent = 'DAFTAR PELANGGAN AIR';
+      showPage('page-daftar');
+      renderDaftarPelanggan();
+      hitungRekap();
+    }
+
+    function showTambahPelanggan() {
+      document.getElementById('judul-header').textContent = 'TAMBAH PELANGGAN';
+      const nextNo = String(db.pelanggan.length + 1).padStart(3, '0');
+      document.getElementById('no-pelanggan').value = nextNo;
+      document.getElementById('nama-pelanggan').value = '';
+      document.getElementById('alamat-pelanggan').value = '';
+      document.getElementById('meter-awal').value = '0';
+      showPage('page-tambah');
+    }
+
+    function simpanPelanggan() {
+      const no = document.getElementById('no-pelanggan').value;
+      const nama = document.getElementById('nama-pelanggan').value.trim().toUpperCase();
+      const dusun = document.getElementById('dusun-pelanggan').value;
+      const alamat = document.getElementById('alamat-pelanggan').value.trim();
+      const meterAwal = parseInt(document.getElementById('meter-awal').value) || 0;
+
+      if (!nama) { alert('Nama harus diisi!'); return; }
+
+      db.pelanggan.push({ no, nama, dusun, alamat, meterAwal });
+      db.dataAir[no] = {};
+      saveDB();
+      showDaftar();
+    }
+
+    function hapusPelanggan(no) {
+      if (confirm('Hapus pelanggan ini? Data air juga akan hilang!')) {
+        db.pelanggan = db.pelanggan.filter(p => p.no!== no);
+        delete db.dataAir[no];
+        saveDB();
+        renderDaftarPelanggan();
+      }
+    }
+
+    function cariPelanggan() {
+      const keyword = document.getElementById('cari-pelanggan').value.toLowerCase();
+      renderDaftarPelanggan(keyword);
+    }
+
+    function renderDaftarPelanggan(keyword = '') {
+      const list = document.getElementById('list-pelanggan');
+      const filtered = db.pelanggan.filter(p =>
+        p.nama.toLowerCase().includes(keyword) ||
+        p.dusun.toLowerCase().includes(keyword) ||
+        p.no.includes(keyword)
+      );
+
+      list.innerHTML = filtered.map(p => `
+        <div class="pelanggan-item">
+          <div onclick="bukaKartu('${p.no}')" style="flex:1; cursor:pointer;">
+            <b>${p.no} - ${p.nama}</b><br>
+            <small>${p.dusun} - ${p.alamat}</small>
+          </div>
+          <button class="btn btn-danger" onclick="hapusPelanggan('${p.no}')" style="padding:5px 10px;">Hapus</button>
+        </div>
+      `).join('') || '<p style="text-align:center; color:#999; margin:20px;">Belum ada pelanggan. Klik + Tambah Pelanggan</p>';
+    }
+
+    function bukaKartu(no) {
+      pelangganAktif = db.pelanggan.find(p => p.no === no);
+      document.getElementById('judul-header').textContent = 'KARTU PEMBAYARAN AIR';
+      document.getElementById('info-pelanggan').innerHTML = `
+        <b>${pelangganAktif.no} - ${pelangganAktif.nama}</b><br>
+        DUSUN: ${pelangganAktif.dusun} | ALAMAT: ${pelangganAktif.alamat}
+      `;
+      showPage('page-kartu');
+      renderTabelAir();
+    }
+
+    function gantiTahun(delta) {
+      tahunAktif += delta;
+      document.getElementById('tahun-aktif').textContent = tahunAktif;
+      renderTabelAir();
+    }
+
+    function renderTabelAir() {
+      const tbody = document.getElementById('tbody-air');
+      const dataPelanggan = db.dataAir[pelangganAktif.no][tahunAktif] || {};
+
+      tbody.innerHTML = bulanNama.map((bln, idx) => {
+        const data = dataPelanggan[idx] || { tgl: '', meterLama: '', meterBaru: '', jumlah: '' };
+const pakai = (data.baru && data.lama)? data.baru - data.lama : '';
+const abm = pakai? 1500 : '';
+const hrg = pakai? 500 : '';
+
+        return `
+          <tr>
+            <td>${bln}</td>
+            <td><input type="text" value="${data.tgl}" onchange="updateData(${idx}, 'tgl', this.value)" style="width:100%; border:none; text-align:center;"></td>
+            <td><input type="number" value="${data.meterLama}" onchange="updateData(${idx}, 'meterLama', this.value)" style="width:100%; border:none; text-align:center;"></td>
+<td><input type="number" value="${data.baru||''}" onchange="updateDataAir(${idx},'baru',this.value)"></td>
+            <td>${pakai}</td>
+            <td>${abm}</td>
+            <td>${hrg}</td>
+<td><input type="number" value="${data.jumlah||''}" onchange="updateDataAir(${idx},'jumlah',this.value)"></td>
+<td>
+  <input type="file" accept="image/*" onchange="uploadFoto(${idx}, this)" style="width:90px;font-size:10px">
+  <br><img src="${data.foto || ''}" onerror="this.style.display='none'" style="width:50px;height:50px;object-fit:cover;border-radius:4px;margin-top:2px">
+</td>
+  
+          </tr>
+        `;
+      }).join('');
+    }
+function uploadFoto(idx, input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    if (!db.dataAir[pelangganAktif.no][tahunAktif][idx]) {
+      db.dataAir[pelangganAktif.no][tahunAktif][idx] = {};
+    }
+    db.dataAir[pelangganAktif.no][tahunAktif][idx].foto = base64;
+    localStorage.setItem('dbAir', JSON.stringify(db));
+    renderTabelAir(); // refresh tabel biar fotonya muncul
+  }
+  reader.readAsDataURL(file);
+}
+    function updateData(bulanIdx, field, value) {
+      if (!db.dataAir[pelangganAktif.no][tahunAktif]) db.dataAir[pelangganAktif.no][tahunAktif] = {};
+      if (!db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx]) db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx] = {};
+
+      const data = db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx];
+      data[field] = value;
+
+      if (field === 'meterBaru' && value) {
+        const meterLama = parseInt(data.meterLama) || 0;
+        const meterBaru = parseInt(value) || 0;
+        const pakai = meterBaru - meterLama;
+        data.jumlah = pakai > 0? (pakai * 500) + 1500 : 0;
+        data.calculated = false;
+
+        if (bulanIdx < 11) {
+          if (!db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1]) db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1] = {};
+          db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1].meterLama = meterBaru;
+        }
+      }
+
+      if (field === 'jumlah' && value) {
+        const jumlah = parseInt(value) || 0;
+        const meterLama = parseInt(data.meterLama) || 0;
+        data.meterBaru = jumlah > 1500? meterLama + Math.floor((jumlah - 1500) / 500) : meterLama;
+        data.calculated = true;
+
+        if (bulanIdx < 11) {
+          if (!db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1]) db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1] = {};
+          db.dataAir[pelangganAktif.no][tahunAktif][bulanIdx + 1].meterLama = data.meterBaru;
+        }
+      }
+
+      saveDB();
+      renderTabelAir();
+      hitungRekap();
+    }
+
+    function hitungRekap() {
+      const bulanIni = new Date().getMonth();
+      let totalPakai = 0, totalUang = 0;
+
+      db.pelanggan.forEach(p => {
+        const data = db.dataAir[p.no][tahunAktif]?.[bulanIni];
+        if (data?.meterBaru && data?.meterLama) {
+          const pakai = data.meterBaru - data.meterLama;
+          totalPakai += pakai;
+          totalUang += (pakai * 500) + 1500;
+        }
+      });
+
+      document.getElementById('rekap-total').innerHTML = `
+        <b>Total ${bulanNama[bulanIni]} ${tahunAktif}</b><br>
+        ${db.pelanggan.length} Pelanggan | ${totalPakai} m³ | Rp ${totalUang.toLocaleString('id-ID')}
+      `;
+    }
+
+    // Init
+    showDaftar();
+  </script>
+</body>
+</html>
